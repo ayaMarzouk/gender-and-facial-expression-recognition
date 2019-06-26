@@ -1,0 +1,177 @@
+import numpy as nptttt
+import os
+import matplotlib.pyplot as plt
+import cv2
+import time
+import argparse
+from keras.models import Sequential
+from keras.layers import Flatten, Dense, Dropout, BatchNormalization
+from keras.applications import VGG16
+from joblib import dump, load
+from sklearn.svm import SVC
+from random import shuffle
+from tqdm import tqdm
+from math import *
+import numpy as np
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+def yolo(Image_path):
+    ap = argparse.ArgumentParser()
+    
+    ap.add_argument('--image',default=Image_path,
+                    help = 'path to input image')
+    ap.add_argument('--config',default='D:/yolo/yolo.cfg',
+                    help = 'path to yolo config file')
+    ap.add_argument('--weights',default='D:/yolo/yolo.weights',
+                    help = 'path to yolo pre-trained weights')
+    ap.add_argument('--classes', default='D:/yolo/yolo.txt',
+                    help = 'path to text file containing class names')
+    args = ap.parse_args()
+
+
+    def get_output_layers(net):
+        layer_names = net.getLayerNames()
+
+        output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+
+        return output_layers
+
+
+    def draw_prediction(img, class_id, confidence, x, y, x_plus_w, y_plus_h):
+        label = str(classes[class_id])
+
+        color = COLORS[class_id]
+
+        cv2.rectangle(img, (x, y), (x_plus_w, y_plus_h), color, 2)
+
+        cv2.putText(img, label, (x - 10, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        cv2.putText(img, str('{:.4f}'.format(confidence)), (x - 25, y - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+
+    image = cv2.imread(args.image)
+
+    Width = image.shape[1]
+    Height = image.shape[0]
+    scale = 0.00392
+
+    classes = None
+
+    with open(args.classes, 'r') as f:
+        classes = [line.strip() for line in f.readlines()]
+
+    #COLORS = np.random.uniform(0, 255, size=(len(classes), 1))
+    COLORS=[[0,255,0]]
+    #print(COLORS)
+    net = cv2.dnn.readNet(args.weights, args.config)
+
+    blob = cv2.dnn.blobFromImage(image, scale, (416, 416), (0, 0, 0), True, crop=False)
+    #image : This is the input image we want to preprocess before passing it through our deep neural network for classification.
+    #scalefactor : After we perform mean subtraction we can optionally scale our images by some factor. This value defaults to 1.0 (i.e., no scaling) but we can supply another value as well. It’s also important to note that scalefactor  should be 1 / \sigma as we’re actually multiplying the input channels (after mean subtraction) by scalefactor .
+    #size : Here we supply the spatial size that the Convolutional Neural Network expects. For most current state-of-the-art neural networks this is either 224×224, 227×227, or 299×299.
+    #mean : These are our mean subtraction values. They can be a 3-tuple of the RGB means or they can be a single value in which case the supplied value is subtracted from every channel of the image. If you’re performing mean subtraction, ensure you supply the 3-tuple in (R, G, B) order, especially when utilizing the default behavior of swapRB=True .
+    #swapRB : OpenCV assumes images are in BGR channel order; however, the mean value assumes we are using RGB order. To resolve this discrepancy we can swap the R and B channels in image  by setting this value to True. By default OpenCV performs this channel swapping for us.
+
+    #returns a  blob  which is our input image after mean subtraction, normalizing, and channel swapping
+    net.setInput(blob)
+
+    outs = net.forward(get_output_layers(net))
+
+    class_ids = []
+    confidences = []
+    boxes = []
+    conf_threshold = 0.5
+    nms_threshold = 0.4 #allowed value of overlapping boxes ,kol ma ktarto hyzwod el overlap m3a t7yat omar medhat
+
+    for out in outs:
+        for detection in out:
+            scores = detection[5:]
+            class_id = np.argmax(scores)
+            confidence = scores[class_id]
+            if confidence >= 0.1:
+                center_x = int(detection[0] * Width)
+                center_y = int(detection[1] * Height)
+                w = int(detection[2] * Width)
+                h = int(detection[3] * Height)
+                x = center_x - w / 2
+                y = center_y - h / 2
+                class_ids.append(class_id)
+                confidences.append(float(confidence))
+                boxes.append([x, y, w, h])
+    print(len(boxes))
+    indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, nms_threshold)
+    Boundry_Boxes=[]
+    for i in indices:
+        i = i[0]
+        box = boxes[i]
+        x = box[0]
+        y = box[1]
+        w = box[2]
+        h = box[3]+20
+        Boundry_Boxes.append([x,y,w,h])
+        draw_prediction(image, class_ids[i], confidences[i], round(x), round(y), round(x + w), round(y + h))
+
+    '''cv2.imshow("object detection", image)
+    print(image.shape)
+    cv2.waitKey()
+    #cv2.imwrite("object-detection.jpg", image)
+    cv2.destroyAllWindows()'''
+    return Boundry_Boxes
+
+IMG_SIZE = 350
+PretrainedVGG = VGG16(weights=None, include_top=False, input_shape=(IMG_SIZE,IMG_SIZE,3))
+model = Sequential()
+model.add(PretrainedVGG)
+model.add(Dense(512, activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(256, activation='relu'))
+model.add(Dense(128, activation='relu'))
+model.add(BatchNormalization())
+model.add(Dense(64, activation='relu'))
+model.add(Flatten())
+model.add(Dense(7, activation='softmax'))
+model.load_weights('CNNModel1.h5')
+GenderClf = load('GenderSVM.joblib')
+
+font = cv2.FONT_HERSHEY_SIMPLEX
+fontScale = 0.5
+fontColor = (0,0,255)
+lineType = 2
+expressionLabels = ['Neutral','Anger','Disgust','Fear','Happy','Sadness','Surprise']
+GenderLabels = ['Male','Female']
+
+
+hogX = cv2.HOGDescriptor()
+test_dir = 'tiny_test'
+imgs = os.listdir(test_dir)
+for img in imgs:
+    Path = os.path.join(test_dir,img)
+    frame = cv2.imread(Path,-1)
+    #faces = face_cascade.detectMultiScale(frame, 1.3, 5)
+    faces=yolo(Path)
+    for (x,y,w,h) in faces:
+        x, y = int(x), int(y)
+        cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),4)
+        roi_gray = frame[y:y+h, x:x+w]
+        roi_gray = cv2.cvtColor(roi_gray,cv2.COLOR_BGR2GRAY)
+        Save_ROI = roi_gray.copy()
+        roi_gray = cv2.resize(roi_gray, (64, 128), interpolation = cv2.INTER_AREA)
+        hog_features = hogX.compute(roi_gray)
+        hog_features = np.array(hog_features)
+        hog_features = hog_features.reshape(3780,)
+        hog_features = hog_features[np.newaxis,:]
+
+        roi_gray = Save_ROI
+        roi_gray = cv2.resize(roi_gray, (IMG_SIZE, IMG_SIZE), interpolation = cv2.INTER_AREA)
+        roi_gray = np.repeat(roi_gray,3,-1)
+        roi_gray = roi_gray.reshape(-1,IMG_SIZE,IMG_SIZE,3)
+        prede = np.argmax(model.predict(roi_gray)[0])
+        predg = GenderClf.predict(hog_features)[0]
+
+        cv2.putText(frame,expressionLabels[prede]+' '+GenderLabels[predg],
+                        (x,y-10),font,fontScale,
+                        fontColor,lineType)
+    cv2.imshow('image',cv2.resize(frame,(950,750),interpolation = cv2.INTER_AREA))
+    cv2.waitKey()
+    #if k == 27: break
+
+cv2.destroyAllWindows()
