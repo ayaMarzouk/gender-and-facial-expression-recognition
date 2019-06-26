@@ -1,0 +1,75 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>7ac287d0-159c-4c32-b05f-ddc3c8990a8c</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>ComputerVisionProject.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>ComputerVisionProject</Name>
+    <RootNamespace>ComputerVisionProject</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="CNN_Model.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CNN_Plus_HOG.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DetectMultiFaces.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="HOG_HOF_Features.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeA_Combined_HOG_HOF.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ComputerVisionProject.py" />
+    <Compile Include="ModeA_HOF_KNN.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeA_HOF_SVM.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeA_HOG_KNN.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeA_HOG_SVM.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeB_HOF_KNN.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeB_HOF_SVM.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeB_HOG_KNN.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ModeB_HOG_SVM.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="YOLO.py" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
