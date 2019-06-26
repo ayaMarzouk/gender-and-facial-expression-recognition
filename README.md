@@ -120,7 +120,7 @@ expression if the face (and we speak in this case about the face as an object) W
 the position of the face in the video could be considered as a change in the
 emotion features.
 
-# References:
+# References
 
 - Datasets used in the project:
 1) FERG_DB_orig Dataset [Animated]
