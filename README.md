@@ -9,7 +9,7 @@ natural faces (Frames). So we skip at least 10% or more of the starting
 images.
 Here is an example of one sample (Person) performing Sad expression in 29
 frames but doesn’t start the real expression till frame number 15:
-![]()
+![](Photos/snap_shoot_data.png)
 
 2- The Next step is to detect the facial area from an input image. We use haar cascade
 Algorithm to detect facial region from an input image. Here we will deal with
@@ -25,12 +25,12 @@ picture or detect any object as a face when it’s Not.
 3) Less robust to occlusion
 
 # HAAR Cascade Result:
-![]()
+![](Photos/Haar_result.png)
 
 - OUR Trail to solve this problems is using YOLO:
 # YOLO Results:
 
-![]()
+![](Photos/YOLO_result.png)
 
 - How YOLO work?
 We used pre-trained Model for Cropping Faces, and we use it as one of the
@@ -53,12 +53,14 @@ make the prediction for them both at the same time: So, We used HOF Descriptor a
 feature extraction method.
 Accuracies chart (HOG + HOF WITH SVM):
 
-![]()
+![](Photos/chart1.png)
 
 - for Our second trial (For The classifier): We Passed both HOG and HOF features to KNN
 classifier
 And we trained different models (With the same Features) but with multiple parameters K
 (N_ Neighbors) and that was the final result:
+
+![](Photos/chart2.png)
 
 - Comparing the two algorithms, It’s clear that SVM is the winning here and with
 fair difference.
@@ -76,16 +78,16 @@ Now the images are perfectly suitable for feeding to the model.
 Using pre-trained Model (VGG16) with transfer learning technique:
 With Training Data of: 85% of the Dataset, and validation Data of: 15%
 Our Final proposed CNN Architecture:
-![]()
+![](Photos/CNN_archi.png)
 
 # CNN – Training Accuracy:
 
-![]()
+![](Photos/CNN_acc.png)
 
 CNN Testing Accuracy: Adding the HOG label from first trial, we got a better results for both
 Gender and Expression Classification:
 
-![]()
+![](Photos/Chart3.png)
 
 # Testing Phase:
 
@@ -93,7 +95,7 @@ Gender and Expression Classification:
 
 1) Mode A: Male
 
-![]()
+![](Photos/Male1.png)
 
 # Conclusions:
 
